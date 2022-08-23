@@ -149,7 +149,7 @@ Token LoadToken(std::istream& input) {
     }
 
     if(c == '-') {
-        return LoadNumber(input);
+        return Token(token_type::Char{'-'});
     }
 
     if(c == '\'') {
