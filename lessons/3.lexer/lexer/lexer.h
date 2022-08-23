@@ -9,9 +9,13 @@
 
 #include <deque>
 #include <iostream>
+#include <cctype>
 
 namespace parse
 {
+
+using namespace std::literals;
+
 namespace token_type {
 
 struct Number {
@@ -139,6 +143,10 @@ private:
     std::deque<Token> tokens_;
 };
 
-
+Token LoadToken(std::istream& input);
+Token LoadString(std::istream& input, bool is_double_quote);
+Token LoadNumber(std::istream& input);
+Token LoadId(std::istream& input);
+Token LoadToken(std::istream& input);
 
 } // namespace parse

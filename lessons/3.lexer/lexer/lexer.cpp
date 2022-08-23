@@ -89,5 +89,123 @@ Token Lexer::NextToken() {
     throw std::logic_error("Not implemented"s);
 }
 
+Token LoadString(std::istream& input, bool is_double_quote) {
+    return Token(token_type::String{});
+}
+Token LoadNumber(std::istream& input) {
+    std::string parsed_sum;
+
+    // Считывает в parsed_num очередной символ из input
+    auto read_char = [&parsed_sum, &input] {
+        parsed_sum += static_cast<char>(input.get());
+        if(!input) {
+            throw LexerError("Failed to read number from stream"s);
+        }
+    };
+
+    auto read_digits = [&input, read_char] {
+        if(!std::isdigit(input.peek())) {
+            throw LexerError("A digit is expected"s);
+        }
+        while (std::isdigit(input.peek())) {
+            read_char();
+        }
+    };
+
+    read_digits();
+
+    try
+    {
+        return Token(token_type::Number{std::stoi(parsed_sum)});
+    }
+    catch(...)
+    {
+        throw LexerError("Failed to convert "s + parsed_sum + " to number"s);
+    }
+}
+
+Token LoadId(std::istream& input) {
+
+    return Token(token_type::Id{});
+}
+
+Token LoadToken(std::istream& input) {
+    char c;
+    if(!(input >> c)) {
+        return Token{token_type::Eof()};
+    }
+
+    if(c == '\n') {
+        return Token(token_type::Newline{});
+    }
+
+    if(std::isdigit(c)) {
+        input.putback(c);
+        return LoadNumber(input);
+    }
+    if(std::isalnum(c) || c == '_') {
+        input.putback(c);
+        return LoadId(input);
+    }
+
+    if(c == '-') {
+        return LoadNumber(input);
+    }
+
+    if(c == '\'') {
+        return LoadString(input, false);
+    } 
+
+    if(c == '\"') {
+        return LoadString(input, true);
+    }
+        
+    if(c == '+') {
+        return Token(token_type::Char{'+'});
+    }
+
+    if(c == '-') {
+        return Token(token_type::Char{'-'});
+    }
+
+    if(c == '*') {
+        return Token(token_type::Char{'*'});
+    }
+
+    if(c == '/') {
+        return Token(token_type::Char{'/'});
+    }
+
+    if(c == '>') {
+        if(input.peek() == '=') {
+            input.get();
+            return Token(token_type::GreaterOrEq{});
+        } else {
+            return Token(token_type::Char{'>'});
+        }
+    }
+
+    if(c == '<') {
+        if(input.peek() == '=') {
+            input.get();
+            return Token(token_type::LessOrEq{});
+        } else if (input.peek() == '>'){
+            input.get();
+            return Token(token_type::NotEq{});
+        } else {
+            return Token(token_type::Char{'<'});
+        }
+    }
+
+    if(c == '=') {
+        if(input.peek() == '=') {
+            input.get();
+            return Token(token_type::Eq{});
+        } else {
+            return Token(token_type::Char{'='});
+        }
+    }
+    return Token(token_type::Id{});
+}
 
 } // namespace parse 
