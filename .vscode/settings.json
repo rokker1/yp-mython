@@ -1,5 +1,28 @@
 {
     "files.associations": {
-        "iostream": "cpp"
-    }
+        "iostream": "cpp",
+        "iosfwd": "cpp",
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "compare": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "memory": "cpp",
+        "memory_resource": "cpp",
+        "optional": "cpp",
+        "string_view": "cpp",
+        "random": "cpp",
+        "system_error": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "charconv": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "variant": "cpp",
+        "stdexcept": "cpp"
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/lessons/3.lexer/lexer",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }
