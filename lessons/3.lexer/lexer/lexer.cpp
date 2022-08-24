@@ -189,7 +189,7 @@ Token LoadNumber(std::istream& input) {
 Token LoadId(std::istream& input) {
     std::string s;
     char c;
-    while (c = input.peek(), std::isalpha(c) || c == '_') {
+    while (c = input.peek(), std::isalnum(c) || c == '_') {
         s.push_back(static_cast<char>(input.get()));
     }
     if(mython_keywords.count(s)) {
