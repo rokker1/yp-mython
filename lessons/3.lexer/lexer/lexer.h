@@ -144,10 +144,5 @@ private:
 };
 
 Token LoadToken(std::istream& input);
-Token LoadString(std::istream& input, bool is_double_quote);
-Token LoadNumber(std::istream& input);
-Token LoadId(std::istream& input);
-Token LoadToken(std::istream& input);
 
-//static std::unordered_map<std::string, Token> mython_keywords;
 } // namespace parse
