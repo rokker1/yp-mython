@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <string>
 #include <variant>
+#include <unordered_map>
 
 #include <deque>
 #include <iostream>
@@ -149,4 +150,5 @@ Token LoadNumber(std::istream& input);
 Token LoadId(std::istream& input);
 Token LoadToken(std::istream& input);
 
+//static std::unordered_map<std::string, Token> mython_keywords;
 } // namespace parse

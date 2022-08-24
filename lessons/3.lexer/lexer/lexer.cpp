@@ -2,11 +2,27 @@
 
 #include <algorithm>
 #include <charconv>
-#include <unordered_map>
+
 
 using namespace std;
 
 namespace parse {
+
+
+static const unordered_map<std::string, Token> mython_keywords = {
+    {"class"s, Token{token_type::Class{}}},
+    {"return"s, Token{token_type::Return{}}}, 
+    {"if"s, Token{token_type::If{}}}, 
+    {"else"s, Token{token_type::Else{}}}, 
+    {"def"s, Token{token_type::Def{}}}, 
+    {"print"s, Token{token_type::Print{}}}, 
+    {"or"s, Token{token_type::Or{}}}, 
+    {"None"s, Token{token_type::None{}}}, 
+    {"and"s, Token{token_type::And{}}}, 
+    {"not"s, Token{token_type::Not{}}}, 
+    {"True"s, Token{token_type::True{}}}, 
+    {"False"s, Token{token_type::False{}}}
+};
 
 bool operator==(const Token& lhs, const Token& rhs) {
     using namespace token_type;
@@ -89,8 +105,52 @@ Token Lexer::NextToken() {
     throw std::logic_error("Not implemented"s);
 }
 
-Token LoadString(std::istream& input, bool is_double_quote) {
-    return Token(token_type::String{});
+Token LoadString(std::istream& input, char exit_quote) {
+    auto it = std::istreambuf_iterator<char>(input);
+    auto end = std::istreambuf_iterator<char>();
+    std::string s;
+    
+    while(true) {
+        if(it  == end) {
+            throw LexerError("String parsing error"s);
+        }
+        const char ch = *it;
+        if (ch == exit_quote) {
+            ++it;
+            break;
+        } else if ('\\') {
+            ++it;
+            if(it  == end) {
+                throw LexerError("String parsing error"s);
+            }
+            const char escaped_char = *(it);
+            switch (escaped_char) {
+                case 'n':
+                    s.push_back('\n');
+                    break;
+                case 't':
+                    s.push_back('\t');
+                    break;
+                case '\'':
+                    s.push_back('\'');
+                    break;
+                case '"':
+                    s.push_back('"');
+                    break;
+                
+                default:
+                    throw LexerError("Unrecognized escape sequence \\"s + escaped_char);
+            }
+
+        } else if (ch == '\n' || ch == '\r') {
+            throw LexerError("Unexpected end of line"s);
+        } else {
+            s.push_back(ch);
+        }
+        ++it;
+    }
+
+    return Token(token_type::String{std::move(s)});
 }
 Token LoadNumber(std::istream& input) {
     std::string parsed_sum;
@@ -125,8 +185,15 @@ Token LoadNumber(std::istream& input) {
 }
 
 Token LoadId(std::istream& input) {
-
-    return Token(token_type::Id{});
+    std::string s;
+    char c;
+    while (c = input.peek(), std::isalpha(c) || c == '_') {
+        s.push_back(static_cast<char>(input.get()));
+    }
+    if(mython_keywords.count(s)) {
+        return mython_keywords.at(s);
+    }
+    return Token(token_type::Id{s});
 }
 
 Token LoadToken(std::istream& input) {
@@ -143,7 +210,8 @@ Token LoadToken(std::istream& input) {
         input.putback(c);
         return LoadNumber(input);
     }
-    if(std::isalnum(c) || c == '_') {
+
+    if(std::isalpha(c) || c == '_') {
         input.putback(c);
         return LoadId(input);
     }
@@ -153,11 +221,11 @@ Token LoadToken(std::istream& input) {
     }
 
     if(c == '\'') {
-        return LoadString(input, false);
+        return LoadString(input, '\'');
     } 
 
-    if(c == '\"') {
-        return LoadString(input, true);
+    if(c == '"') {
+        return LoadString(input, '"');
     }
         
     if(c == '+') {
