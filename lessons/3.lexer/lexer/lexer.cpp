@@ -120,7 +120,7 @@ Token LoadString(std::istream& input, char exit_quote) {
         if (ch == exit_quote) {
             ++it;
             break;
-        } else if ('\\') {
+        } else if (ch == '\\') {
             ++it;
             if(it  == end) {
                 throw LexerError("String parsing error"s);
@@ -199,7 +199,18 @@ Token LoadId(std::istream& input) {
 }
 
 Token LoadToken(std::istream& input) {
+    // если токен пустой (читаем первый токен)
+    // или последний - текущий токен - новая линия - 
+    // прочитать отступ
+    // сравнить с хранимым отступом
+    // обновить хранимый отступ
+    // вернуть токен с отступом
+
     char c;
+    if(input.peek() == '\n') {
+        input.get();
+        return Token(token_type::Newline{});
+    }
     if(!(input >> c)) {
         return Token{token_type::Eof()};
     }
@@ -259,9 +270,6 @@ Token LoadToken(std::istream& input) {
         if(input.peek() == '=') {
             input.get();
             return Token(token_type::LessOrEq{});
-        } else if (input.peek() == '>'){
-            input.get();
-            return Token(token_type::NotEq{});
         } else {
             return Token(token_type::Char{'<'});
         }
@@ -273,6 +281,14 @@ Token LoadToken(std::istream& input) {
             return Token(token_type::Eq{});
         } else {
             return Token(token_type::Char{'='});
+        }
+    }
+    if(c == '!') {
+        if(input.peek() == '=') {
+            input.get();
+            return Token(token_type::NotEq{});
+        } else {
+            return Token(token_type::Char{'!'});
         }
     }
     return Token(token_type::Id{});
