@@ -105,9 +105,10 @@ public:
     template <typename T>
     const T& Expect() const {
         using namespace std::literals;
-        //
-
-        throw LexerError("not implemented"s);
+        if(!current_token_.Is<T>()) {
+            throw LexerError("Expect<T> not passed for curren_token_!"s);
+        }
+        return current_token_.As<T>();
     }
 
     // Метод проверяет, что текущий токен имеет тип T, а сам токен содержит значение value.
@@ -115,33 +116,31 @@ public:
     template <typename T, typename U>
     void Expect(const U& value) const {
         using namespace std::literals;
-        //
-        (void)value;
-        throw LexerError("not implemented"s);
+        if(current_token_ != T{value}) {
+            throw LexerError("Expect<T, U> not passed for curren_token_!"s);
+        }
     }
 
     // Если следующий токен имеет тип T, метод возвращает ссылку на него.
     // В противном случае метод выбрасывает исключение LexerError
     template <typename T>
-    const T& ExpectNext() const {
+    const T& ExpectNext() {
         using namespace std::literals;
-        //
-
-        throw LexerError("not implemented"s);
+        NextToken();
+        return Expect<T>();
     }
 
     // Метод проверяет, что следующий токен имеет тип T, а сам токен содержит значение value.
     // В противном случае метод выбрасывает исключение LexerError
     template <typename T, typename U>
-    void ExpectNext(const U& value) const {
+    void ExpectNext(const U& value) {
         using namespace std::literals;
-        //
-        (void)value;
-        throw LexerError("not implemented"s);
+        NextToken();
+        Expect<T, U>(value);
     }
 private:
     std::istream& input_;
-    std::deque<Token> tokens_;
+    Token current_token_;
 };
 
 Token LoadToken(std::istream& input);

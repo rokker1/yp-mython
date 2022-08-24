@@ -93,16 +93,18 @@ std::ostream& operator<<(std::ostream& os, const Token& rhs) {
 
 Lexer::Lexer(std::istream& input)
     : input_(input)
-{}
+    , current_token_(LoadToken(input))
+{
+    
+}
 
 const Token& Lexer::CurrentToken() const {
-    // Заглушка. Реализуйте метод самостоятельно
-    throw std::logic_error("Not implemented"s);
+    return current_token_;
 }
 
 Token Lexer::NextToken() {
-    // Заглушка. Реализуйте метод самостоятельно
-    throw std::logic_error("Not implemented"s);
+    current_token_ = LoadToken(input_);
+    return current_token_;
 }
 
 Token LoadString(std::istream& input, char exit_quote) {
