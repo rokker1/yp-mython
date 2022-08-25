@@ -43,7 +43,13 @@
         "sstream": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp",
-        "bit": "cpp"
+        "bit": "cpp",
+        "atomic": "cpp",
+        "cstdarg": "cpp",
+        "cstddef": "cpp",
+        "algorithm": "cpp",
+        "iterator": "cpp",
+        "numeric": "cpp"
     },
     "cmake.sourceDirectory": "${workspaceFolder}/lessons/3.lexer/lexer",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"

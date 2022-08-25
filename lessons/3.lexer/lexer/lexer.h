@@ -11,6 +11,7 @@
 #include <deque>
 #include <iostream>
 #include <cctype>
+#include <optional>
 
 namespace parse
 {
@@ -105,10 +106,10 @@ public:
     template <typename T>
     const T& Expect() const {
         using namespace std::literals;
-        if(!current_token_.Is<T>()) {
+        if(!(current_token_->Is<T>())) {
             throw LexerError("Expect<T> not passed for curren_token_!"s);
         }
-        return current_token_.As<T>();
+        return current_token_->As<T>();
     }
 
     // Метод проверяет, что текущий токен имеет тип T, а сам токен содержит значение value.
@@ -116,7 +117,7 @@ public:
     template <typename T, typename U>
     void Expect(const U& value) const {
         using namespace std::literals;
-        if(current_token_ != T{value}) {
+        if(*current_token_ != T{value}) {
             throw LexerError("Expect<T, U> not passed for curren_token_!"s);
         }
     }
@@ -140,9 +141,15 @@ public:
     }
 private:
     std::istream& input_;
-    Token current_token_;
+    size_t current_indent_ = 0; // размер текущего отступа в пробелах
+    size_t indent_buf_ = 0; // счетчик считанного отступа
+    std::optional<Token> current_token_;
+
+    Token LoadToken(std::istream& input);
+    std::optional<size_t> GetIndent();
+
 };
 
-Token LoadToken(std::istream& input);
+
 
 } // namespace parse

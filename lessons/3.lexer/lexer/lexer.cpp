@@ -93,18 +93,21 @@ std::ostream& operator<<(std::ostream& os, const Token& rhs) {
 
 Lexer::Lexer(std::istream& input)
     : input_(input)
-    , current_token_(LoadToken(input))
-{
+    , current_indent_(0)
+    , indent_buf_(0)
     
+
+{
+    current_token_ = LoadToken(input);
 }
 
 const Token& Lexer::CurrentToken() const {
-    return current_token_;
+    return *current_token_;
 }
 
 Token Lexer::NextToken() {
     current_token_ = LoadToken(input_);
-    return current_token_;
+    return *current_token_;
 }
 
 Token LoadString(std::istream& input, char exit_quote) {
@@ -198,13 +201,55 @@ Token LoadId(std::istream& input) {
     return Token(token_type::Id{s});
 }
 
-Token LoadToken(std::istream& input) {
+std::optional<size_t> Lexer::GetIndent() {
+    size_t updated_indetnt = 0; // отступ, который считаем для текущей строки
+    while(input_.peek() == ' ') {
+        input_.get();
+        ++updated_indetnt;
+    }
+    if(input_.peek() == '#') {
+        std::string s;
+        getline(input_, s);
+        return std::nullopt;
+    }
+    if(input_.peek() == '\n') {
+        // прочитана пустая строка из пробелов
+        input_.get();
+        return std::nullopt;
+    }
+
+    return updated_indetnt;
+}
+
+Token Lexer::LoadToken(std::istream& input) {
     // если токен пустой (читаем первый токен)
     // или последний - текущий токен - новая линия - 
     // прочитать отступ
     // сравнить с хранимым отступом
     // обновить хранимый отступ
     // вернуть токен с отступом
+    if(current_token_ == Token(token_type::Newline{}) || !current_token_.has_value()) {
+        std::optional<size_t> indent = GetIndent();
+        
+        if(indent.has_value()) {
+            if(*indent % 2 != 0) {
+                throw LexerError("Not even indent used!"s);
+            }
+
+            indent_buf_ = *indent;
+        } else {
+            return LoadToken(input);
+        }
+    }
+
+    if(indent_buf_ < current_indent_) {
+        current_indent_ -= 2;
+        return Token(token_type::Dedent{});
+    } else if (indent_buf_ > current_indent_) {
+        current_indent_ += 2;
+        return Token(token_type::Indent{});
+    }
+
 
     char c;
     if(input.peek() == '\n') {
@@ -255,6 +300,22 @@ Token LoadToken(std::istream& input) {
 
     if(c == '/') {
         return Token(token_type::Char{'/'});
+    }
+
+    if(c == ':') {
+        return Token(token_type::Char{':'});
+    }
+    if(c == '(') {
+        return Token(token_type::Char{'('});
+    }
+    if(c == ')') {
+        return Token(token_type::Char{')'});
+    }
+    if(c == ',') {
+        return Token(token_type::Char{','});
+    }
+    if(c == '.') {
+        return Token(token_type::Char{'.'});
     }
 
     if(c == '>') {
