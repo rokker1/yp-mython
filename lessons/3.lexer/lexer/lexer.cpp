@@ -209,6 +209,7 @@ std::optional<size_t> Lexer::GetIndent() {
     }
     if(input_.peek() == '#') {
         std::string s;
+        no_newline_chars_ = false;
         getline(input_, s);
         return std::nullopt;
     }
@@ -252,6 +253,7 @@ Token Lexer::LoadToken(std::istream& input) {
 
 
     char c;
+
     if(input.peek() == '\n') {
         input.get();
         no_newline_chars_ = false;
@@ -264,8 +266,14 @@ Token Lexer::LoadToken(std::istream& input) {
         }
         return Token{token_type::Eof()};
     }
-
+    if(c == '#') {
+        std::string s;
+        no_newline_chars_ = false;
+        getline(input, s);
+        return Token(token_type::Newline{});
+    }
     if(c == '\n') {
+        no_newline_chars_ = false;
         return Token(token_type::Newline{});
     }
 
