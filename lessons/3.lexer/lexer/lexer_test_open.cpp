@@ -354,17 +354,17 @@ abc#
 }  // namespace
 
 void RunOpenLexerTests(TestRunner& tr) {
-    // RUN_TEST(tr, parse::TestSimpleAssignment);
-    // RUN_TEST(tr, parse::TestKeywords);
-    // RUN_TEST(tr, parse::TestNumbers);
-    // RUN_TEST(tr, parse::TestIds);
-    // RUN_TEST(tr, parse::TestStrings);
-    // RUN_TEST(tr, parse::TestOperations);
-    // RUN_TEST(tr, parse::TestIndentsAndNewlines);
-    // RUN_TEST(tr, parse::TestEmptyLinesAreIgnored);
+    RUN_TEST(tr, parse::TestSimpleAssignment);
+    RUN_TEST(tr, parse::TestKeywords);
+    RUN_TEST(tr, parse::TestNumbers);
+    RUN_TEST(tr, parse::TestIds);
+    RUN_TEST(tr, parse::TestStrings);
+    RUN_TEST(tr, parse::TestOperations);
+    RUN_TEST(tr, parse::TestIndentsAndNewlines);
+    RUN_TEST(tr, parse::TestEmptyLinesAreIgnored);
     // RUN_TEST(tr, parse::TestExpect);
     // RUN_TEST(tr, parse::TestExpectNext);
-    // RUN_TEST(tr, parse::TestMythonProgram);
+    RUN_TEST(tr, parse::TestMythonProgram);
     RUN_TEST(tr, parse::TestAlwaysEmitsNewlineAtTheEndOfNonemptyLine);
     // RUN_TEST(tr, parse::TestCommentsAreIgnored);
 }

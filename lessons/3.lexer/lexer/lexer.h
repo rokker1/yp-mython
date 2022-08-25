@@ -148,6 +148,9 @@ private:
     Token LoadToken(std::istream& input);
     std::optional<size_t> GetIndent();
 
+    // флаг, что до сих пор в документе явно не встречалось символа Newline
+    bool no_newline_chars_ = true;
+
 };
 
 

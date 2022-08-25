@@ -254,9 +254,14 @@ Token Lexer::LoadToken(std::istream& input) {
     char c;
     if(input.peek() == '\n') {
         input.get();
+        no_newline_chars_ = false;
         return Token(token_type::Newline{});
     }
     if(!(input >> c)) {
+        if(no_newline_chars_) {
+            no_newline_chars_ = false;
+            return Token(token_type::Newline{});
+        }
         return Token{token_type::Eof()};
     }
 
