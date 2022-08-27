@@ -43,32 +43,53 @@ ObjectHolder::operator bool() const {
     return Get() != nullptr;
 }
 
-bool IsTrue(const ObjectHolder& /*object*/) {
-    // Заглушка. Реализуйте метод самостоятельно
+bool IsTrue(const ObjectHolder& object) {
+    // проверяем что object не пуст
+    if(object) {
+        if(Bool* p = object.TryAs<Bool>()) {
+            return p->GetValue();
+        } else if (Number* p = object.TryAs<Number>()) {
+            return p->GetValue() != 0;
+        } else if (String* p = object.TryAs<String>()) {
+            return !(p->GetValue().empty());
+        }
+    }
     return false;
 }
 
-void ClassInstance::Print(std::ostream& /*os*/, Context& /*context*/) {
+void ClassInstance::Print(std::ostream& os, Context& context) {
     // Заглушка, реализуйте метод самостоятельно
+    if(HasMethod("__str__", 0)) {
+        ObjectHolder string_representation = Call("__str__", {}, context);
+        if(string_representation) { // если холдер не пуст
+            String* s_object_ptr = string_representation.TryAs<String>();
+            s_object_ptr->Print(os, context);
+        }
+    } else {
+        size_t obj_address = *(reinterpret_cast<size_t*>(this));
+        os << obj_address;
+    }
 }
 
-bool ClassInstance::HasMethod(const std::string& /*method*/, size_t /*argument_count*/) const {
-    // Заглушка, реализуйте метод самостоятельно
+bool ClassInstance::HasMethod(const std::string& method, size_t argument_count) const {
+    const Method* m = cls_.GetMethod(method);
+    if(m->formal_params.size() == argument_count) {
+        return true;
+    }
     return false;
 }
 
 Closure& ClassInstance::Fields() {
-    // Заглушка. Реализуйте метод самостоятельно
-    throw std::logic_error("Not implemented"s);
+    return fields_;
 }
 
 const Closure& ClassInstance::Fields() const {
-    // Заглушка. Реализуйте метод самостоятельно
-    throw std::logic_error("Not implemented"s);
+    return fields_;
 }
 
-ClassInstance::ClassInstance(const Class& /*cls*/) {
-    // Реализуйте метод самостоятельно
+ClassInstance::ClassInstance(const Class& cls) 
+    : cls_(cls)
+{
 }
 
 ObjectHolder ClassInstance::Call(const std::string& /*method*/,
@@ -78,7 +99,11 @@ ObjectHolder ClassInstance::Call(const std::string& /*method*/,
     throw std::runtime_error("Not implemented"s);
 }
 
-Class::Class(std::string /*name*/, std::vector<Method> /*methods*/, const Class* /*parent*/) {
+Class::Class(std::string name, std::vector<Method> methods, const Class* parent) 
+    : name_(name)
+    , methods_(std::move(methods))
+    , parent_(parent)
+{
     // Реализуйте метод самостоятельно
 }
 

@@ -144,6 +144,10 @@ public:
 
     // Выводит в os строку "Class <имя класса>", например "Class cat"
     void Print(std::ostream& os, Context& context) override;
+private:
+    std::string name_;
+    std::vector<Method> methods_;
+    const Class* parent_;
 };
 
 // Экземпляр класса
@@ -173,6 +177,9 @@ public:
     [[nodiscard]] Closure& Fields();
     // Возвращает константную ссылку на Closure, содержащую поля объекта
     [[nodiscard]] const Closure& Fields() const;
+private:
+    const Class& cls_;
+    Closure fields_;
 };
 
 /*
