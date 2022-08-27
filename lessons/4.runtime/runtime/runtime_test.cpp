@@ -535,11 +535,11 @@ void RunObjectsTests(TestRunner& tr) {
     RUN_TEST(tr, runtime::TestNumber);
     RUN_TEST(tr, runtime::TestString);
     RUN_TEST(tr, runtime::TestBool);
-    RUN_TEST(tr, runtime::TestMethodInvocation);
+    // RUN_TEST(tr, runtime::TestMethodInvocation);
     RUN_TEST(tr, runtime::TestIsTrue);
     RUN_TEST(tr, runtime::TestComparison);
     RUN_TEST(tr, runtime::TestClass);
-    RUN_TEST(tr, runtime::TestClassInstance);
+    // RUN_TEST(tr, runtime::TestClassInstance);
 }
 
 void RunObjectHolderTests(TestRunner& tr) {

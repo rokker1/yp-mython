@@ -90,14 +90,28 @@ const Closure& ClassInstance::Fields() const {
 ClassInstance::ClassInstance(const Class& cls) 
     : cls_(cls)
 {
+    
 }
 
 ObjectHolder ClassInstance::Call(const std::string& method,
                                  const std::vector<ObjectHolder>& actual_args,
                                  Context& context) {
+    
+    fields_.insert({"self", ObjectHolder::Share(*this)});
+
     if(HasMethod(method, actual_args.size())) {
         const Method* m = cls_.GetMethod(method);
+        size_t params_count = m->formal_params.size();
+        for(size_t i = 0; i < params_count; ++i) {
+            fields_.insert({m->formal_params.at(i), actual_args.at(i)});
+        }
+
+
         return m->body.get()->Execute(fields_, context);
+
+
+
+
 
     } else {
         throw runtime_error("No such method!"s);
@@ -125,46 +139,97 @@ const Method* Class::GetMethod(const std::string& name) const {
     return nullptr;
 }
 
-[[nodiscard]] inline const std::string& Class::GetName() const {
-    // Заглушка. Реализуйте метод самостоятельно.
-    throw std::runtime_error("Not implemented"s);
+[[nodiscard]] const std::string& Class::GetName() const {
+    return name_;
 }
 
-void Class::Print(ostream& /*os*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
+void Class::Print(ostream& os, Context& context) {
+    os << "Class "s << name_ ;
 }
 
 void Bool::Print(std::ostream& os, [[maybe_unused]] Context& context) {
     os << (GetValue() ? "True"sv : "False"sv);
 }
 
-bool Equal(const ObjectHolder& /*lhs*/, const ObjectHolder& /*rhs*/, Context& /*context*/) {
-    // Заглушка. Реализуйте функцию самостоятельно
+bool Equal(const ObjectHolder& lhs, const ObjectHolder& rhs, Context& context) {
+    if(Number* n_left = lhs.TryAs<Number>()) {
+        if (Number* n_right = rhs.TryAs<Number>()) {
+            return n_left->GetValue() == n_right->GetValue();
+        }
+    }
+    if(String* s_left = lhs.TryAs<String>()) {
+        if (String* s_right = rhs.TryAs<String>()) {
+            return s_left->GetValue() == s_right->GetValue();
+        }
+    }
+    if(Bool* b_left = lhs.TryAs<Bool>()) {
+        if (Bool* b_right = rhs.TryAs<Bool>()) {
+            return b_left->GetValue() == b_right->GetValue();
+        }
+    }
+
+    if(ClassInstance* left = lhs.TryAs<ClassInstance>()) {
+        if(left->HasMethod("__eq__", 1)) {
+            ObjectHolder result = left->Call("__eq__", {rhs}, context);
+            if(result) {
+                Bool* r = result.TryAs<Bool>();
+                return r->GetValue();
+            } 
+        }
+    }
+
+    if(!lhs && !rhs) {
+        return true;
+    }
+
     throw std::runtime_error("Cannot compare objects for equality"s);
 }
 
-bool Less(const ObjectHolder& /*lhs*/, const ObjectHolder& /*rhs*/, Context& /*context*/) {
-    // Заглушка. Реализуйте функцию самостоятельно
+bool Less(const ObjectHolder& lhs, const ObjectHolder& rhs, Context& context) {
+    if(Number* n_left = lhs.TryAs<Number>()) {
+        if (Number* n_right = rhs.TryAs<Number>()) {
+            return n_left->GetValue() < n_right->GetValue();
+        }
+    }
+    if(String* s_left = lhs.TryAs<String>()) {
+        if (String* s_right = rhs.TryAs<String>()) {
+            return s_left->GetValue() < s_right->GetValue();
+        }
+    }
+    if(Bool* b_left = lhs.TryAs<Bool>()) {
+        if (Bool* b_right = rhs.TryAs<Bool>()) {
+            return b_left->GetValue() < b_right->GetValue();
+        }
+    }
+    if(ClassInstance* left = lhs.TryAs<ClassInstance>()) {
+        if(left->HasMethod("__lt__", 1)) {
+            ObjectHolder result = left->Call("__lt__", {rhs}, context);
+            if(result) {
+                Bool* r = result.TryAs<Bool>();
+                return r->GetValue();
+            } 
+        }
+    }
+
     throw std::runtime_error("Cannot compare objects for less"s);
 }
 
-bool NotEqual(const ObjectHolder& /*lhs*/, const ObjectHolder& /*rhs*/, Context& /*context*/) {
-    // Заглушка. Реализуйте функцию самостоятельно
+bool NotEqual(const ObjectHolder& lhs, const ObjectHolder& rhs, Context& context) {
+    return !(Equal(lhs, rhs, context));
+}
+
+bool Greater(const ObjectHolder& lhs, const ObjectHolder& rhs, Context& context) {
+    return (!(Less(lhs, rhs, context)) && NotEqual(lhs, rhs, context));
     throw std::runtime_error("Cannot compare objects for equality"s);
 }
 
-bool Greater(const ObjectHolder& /*lhs*/, const ObjectHolder& /*rhs*/, Context& /*context*/) {
-    // Заглушка. Реализуйте функцию самостоятельно
+bool LessOrEqual(const ObjectHolder& lhs, const ObjectHolder& rhs, Context& context) {
+    return !Greater(lhs, rhs, context);
     throw std::runtime_error("Cannot compare objects for equality"s);
 }
 
-bool LessOrEqual(const ObjectHolder& /*lhs*/, const ObjectHolder& /*rhs*/, Context& /*context*/) {
-    // Заглушка. Реализуйте функцию самостоятельно
-    throw std::runtime_error("Cannot compare objects for equality"s);
-}
-
-bool GreaterOrEqual(const ObjectHolder& /*lhs*/, const ObjectHolder& /*rhs*/, Context& /*context*/) {
-    // Заглушка. Реализуйте функцию самостоятельно
+bool GreaterOrEqual(const ObjectHolder& lhs, const ObjectHolder& rhs, Context& context) {
+    return !Less(lhs, rhs, context);
     throw std::runtime_error("Cannot compare objects for equality"s);
 }
 
