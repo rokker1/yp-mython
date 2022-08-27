@@ -117,14 +117,8 @@ ObjectHolder ClassInstance::Call(const std::string& method,
         for(size_t i = 0; i < params_count; ++i) {
             fields_.insert({m->formal_params.at(i), actual_args.at(i)});
         }
-
-
         return m->body.get()->Execute(fields_, context);
-
-
-
-
-
+        
     } else {
         throw runtime_error("No such method!"s);
     }
@@ -155,7 +149,7 @@ const Method* Class::GetMethod(const std::string& name) const {
     return name_;
 }
 
-void Class::Print(ostream& os, Context& context) {
+void Class::Print(ostream& os, [[maybe_unused]] Context& context) {
     os << "Class "s << name_ ;
 }
 

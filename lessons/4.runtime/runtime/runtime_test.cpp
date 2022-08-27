@@ -166,7 +166,7 @@ void TestMethodInvocation() {
     ASSERT_EQUAL(child_closure.count("arg2_child"s), 1U);
     ASSERT(Equal(child_closure.at("arg2_child"s), (ObjectHolder::Own(String{"value2"s})), context));
 
-    ASSERT(child_inst.HasMethod("test_2"s, 1U));
+    ASSERT(child_inst.HasMethod("test_2"s, 1U)); //
     child_closure.clear();
     res = child_inst.Call("test_2"s, {ObjectHolder::Own(String{":)"s})}, context);
     ASSERT(Equal(res, ObjectHolder::Own(Number{456}), context));
@@ -535,7 +535,7 @@ void RunObjectsTests(TestRunner& tr) {
     RUN_TEST(tr, runtime::TestNumber);
     RUN_TEST(tr, runtime::TestString);
     RUN_TEST(tr, runtime::TestBool);
-    // RUN_TEST(tr, runtime::TestMethodInvocation);
+    RUN_TEST(tr, runtime::TestMethodInvocation);
     RUN_TEST(tr, runtime::TestIsTrue);
     RUN_TEST(tr, runtime::TestComparison);
     RUN_TEST(tr, runtime::TestClass);
