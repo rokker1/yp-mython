@@ -72,11 +72,18 @@ void ClassInstance::Print(std::ostream& os, Context& context) {
 }
 
 bool ClassInstance::HasMethod(const std::string& method, size_t argument_count) const {
+    
     const Method* m = cls_.GetMethod(method);
-    if(m->formal_params.size() == argument_count) {
-        return true;
+    
+    if(m) {
+        if(m->formal_params.size() == argument_count) {
+            return true;
+        }
+    } else {
+         return false;
     }
-    return false;
+
+   throw runtime_error("e"s);
 }
 
 Closure& ClassInstance::Fields() {
@@ -99,7 +106,12 @@ ObjectHolder ClassInstance::Call(const std::string& method,
     
     fields_.insert({"self", ObjectHolder::Share(*this)});
 
-    if(HasMethod(method, actual_args.size())) {
+    size_t args_count = 0;
+    if(!actual_args.empty()) {
+        args_count = actual_args.size();
+    }
+
+    if(HasMethod(method, args_count)) {
         const Method* m = cls_.GetMethod(method);
         size_t params_count = m->formal_params.size();
         for(size_t i = 0; i < params_count; ++i) {

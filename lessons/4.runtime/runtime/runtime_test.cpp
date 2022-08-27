@@ -539,7 +539,7 @@ void RunObjectsTests(TestRunner& tr) {
     RUN_TEST(tr, runtime::TestIsTrue);
     RUN_TEST(tr, runtime::TestComparison);
     RUN_TEST(tr, runtime::TestClass);
-    // RUN_TEST(tr, runtime::TestClassInstance);
+    RUN_TEST(tr, runtime::TestClassInstance);
 }
 
 void RunObjectHolderTests(TestRunner& tr) {
