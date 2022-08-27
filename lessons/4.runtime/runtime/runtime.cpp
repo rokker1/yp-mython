@@ -92,11 +92,16 @@ ClassInstance::ClassInstance(const Class& cls)
 {
 }
 
-ObjectHolder ClassInstance::Call(const std::string& /*method*/,
-                                 const std::vector<ObjectHolder>& /*actual_args*/,
-                                 Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно.
-    throw std::runtime_error("Not implemented"s);
+ObjectHolder ClassInstance::Call(const std::string& method,
+                                 const std::vector<ObjectHolder>& actual_args,
+                                 Context& context) {
+    if(HasMethod(method, actual_args.size())) {
+        const Method* m = cls_.GetMethod(method);
+        return m->body.get()->Execute(fields_, context);
+
+    } else {
+        throw runtime_error("No such method!"s);
+    }
 }
 
 Class::Class(std::string name, std::vector<Method> methods, const Class* parent) 
@@ -104,11 +109,19 @@ Class::Class(std::string name, std::vector<Method> methods, const Class* parent)
     , methods_(std::move(methods))
     , parent_(parent)
 {
+    // ??? забыл сделать методы базового класса, видимо)
     // Реализуйте метод самостоятельно
 }
 
-const Method* Class::GetMethod(const std::string& /*name*/) const {
-    // Заглушка. Реализуйте метод самостоятельно
+const Method* Class::GetMethod(const std::string& name) const {
+    std::vector<Method>::const_iterator method = std::find_if(
+                methods_.begin(), methods_.end(), 
+                [&name](const runtime::Method& method){
+                    return method.name == name;
+                });
+    if(method != methods_.end()) {
+        return &(*method);
+    }
     return nullptr;
 }
 
