@@ -143,21 +143,6 @@ Class::Class(std::string name, std::vector<Method> methods, const Class* parent)
     , methods_(std::move(methods))
     , parent_(parent)
 {
-    // if(parent) {
-    //     for (const Method& m : parent->methods_) {
-
-    //         auto it = std::find_if(methods_.begin(), methods_.end(), [&m](const Method& local_method){
-    //             return local_method.name == m.name;
-    //         });
-    //         if(it == methods_.end()) {
-    //             methods_.push_back({
-    //                 m.name,
-    //                 m.formal_params,
-
-    //             });
-    //         }
-    //     }
-    // }
 
 }
 
