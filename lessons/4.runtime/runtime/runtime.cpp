@@ -74,13 +74,20 @@ void ClassInstance::Print(std::ostream& os, Context& context) {
 bool ClassInstance::HasMethod(const std::string& method, size_t argument_count) const {
     
     const Method* m = cls_.GetMethod(method);
+    // поиск у базового класса
+    if(!m) {
+        if(cls_.GetParent()) {
+            m = cls_.GetParent()->GetMethod(method);
+        }
+
+    }
     
     if(m) {
         if(m->formal_params.size() == argument_count) {
             return true;
+        } else {
+            return false;
         }
-    } else {
-         return false;
     }
 
    throw runtime_error("e"s);
@@ -104,6 +111,7 @@ ObjectHolder ClassInstance::Call(const std::string& method,
                                  const std::vector<ObjectHolder>& actual_args,
                                  Context& context) {
     
+    fields_.clear();
     fields_.insert({"self", ObjectHolder::Share(*this)});
 
     size_t args_count = 0;
@@ -113,6 +121,12 @@ ObjectHolder ClassInstance::Call(const std::string& method,
 
     if(HasMethod(method, args_count)) {
         const Method* m = cls_.GetMethod(method);
+        if(!m) {
+            if(cls_.GetParent()) {
+                m = cls_.GetParent()->GetMethod(method);
+            }
+
+        }
         size_t params_count = m->formal_params.size();
         for(size_t i = 0; i < params_count; ++i) {
             fields_.insert({m->formal_params.at(i), actual_args.at(i)});
@@ -129,8 +143,22 @@ Class::Class(std::string name, std::vector<Method> methods, const Class* parent)
     , methods_(std::move(methods))
     , parent_(parent)
 {
-    // ??? забыл сделать методы базового класса, видимо)
-    // Реализуйте метод самостоятельно
+    // if(parent) {
+    //     for (const Method& m : parent->methods_) {
+
+    //         auto it = std::find_if(methods_.begin(), methods_.end(), [&m](const Method& local_method){
+    //             return local_method.name == m.name;
+    //         });
+    //         if(it == methods_.end()) {
+    //             methods_.push_back({
+    //                 m.name,
+    //                 m.formal_params,
+
+    //             });
+    //         }
+    //     }
+    // }
+
 }
 
 const Method* Class::GetMethod(const std::string& name) const {

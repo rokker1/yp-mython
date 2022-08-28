@@ -145,6 +145,10 @@ public:
 
     // Выводит в os строку "Class <имя класса>", например "Class cat"
     void Print(std::ostream& os, Context& context) override;
+
+    const Class* GetParent() const {
+        return parent_;
+    }
 private:
     std::string name_;
     std::vector<Method> methods_;
