@@ -16,23 +16,41 @@ const string ADD_METHOD = "__add__"s;
 const string INIT_METHOD = "__init__"s;
 }  // namespace
 
-ObjectHolder Assignment::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
-    return {};
+ObjectHolder Assignment::Execute(Closure& closure, Context& context) {
+    ObjectHolder holder = statement_ptr_.get()->Execute(closure, context);
+    closure.insert_or_assign(
+        var_,
+        ObjectHolder::Share(*(holder.Get()))
+    );
+    return holder;
 }
 
-Assignment::Assignment(std::string /*var*/, std::unique_ptr<Statement> /*rv*/) {
+Assignment::Assignment(std::string var, std::unique_ptr<Statement> rv) 
+    : var_(var)
+    , statement_ptr_(std::move(rv)) // ?? сомнительное решение
+{
 }
 
-VariableValue::VariableValue(const std::string& /*var_name*/) {
+
+VariableValue::VariableValue(const std::string& var_name) 
+   : var_name_(var_name) {}
+
+
+VariableValue::VariableValue(std::vector<std::string> dotted_ids) 
+: dotted_ids_(dotted_ids)
+{
 }
 
-VariableValue::VariableValue(std::vector<std::string> /*dotted_ids*/) {
-}
+ObjectHolder VariableValue::Execute(Closure& closure, Context& /*context*/) {
+    if(!var_name_.empty()) {
+        if(closure.count(var_name_)) {
+            return ObjectHolder::Share(*closure.at(var_name_).Get());
+        }
+    } // TODO!!! dotted ids!!!
+    /* else {
 
-ObjectHolder VariableValue::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
-    return {};
+    }*/
+    throw std::runtime_error("invalid variable"s);
 }
 
 unique_ptr<Print> Print::Variable(const std::string& /*name*/) {

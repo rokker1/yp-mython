@@ -38,9 +38,14 @@ x = circle.center.x
 class VariableValue : public Statement {
 public:
     explicit VariableValue(const std::string& var_name);
+        
     explicit VariableValue(std::vector<std::string> dotted_ids);
 
     runtime::ObjectHolder Execute(runtime::Closure& closure, runtime::Context& context) override;
+
+private:
+    std::string var_name_;
+    std::vector<std::string> dotted_ids_;
 };
 
 // Присваивает переменной, имя которой задано в параметре var, значение выражения rv
@@ -49,6 +54,11 @@ public:
     Assignment(std::string var, std::unique_ptr<Statement> rv);
 
     runtime::ObjectHolder Execute(runtime::Closure& closure, runtime::Context& context) override;
+
+private:
+    std::string var_;
+    std::unique_ptr<Statement> statement_ptr_;
+    
 };
 
 // Присваивает полю object.field_name значение выражения rv
