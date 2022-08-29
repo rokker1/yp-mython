@@ -117,8 +117,9 @@ public:
 // Базовый класс для унарных операций
 class UnaryOperation : public Statement {
 public:
-    explicit UnaryOperation(std::unique_ptr<Statement> /*argument*/) {
+    explicit UnaryOperation(std::unique_ptr<Statement> argument) {
         // Реализуйте метод самостоятельно
+
     }
 };
 
