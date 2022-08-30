@@ -67,6 +67,11 @@ public:
     FieldAssignment(VariableValue object, std::string field_name, std::unique_ptr<Statement> rv);
 
     runtime::ObjectHolder Execute(runtime::Closure& closure, runtime::Context& context) override;
+
+private:
+    VariableValue object_;
+    std::string field_name_;
+    std::unique_ptr<Statement> statement_ptr_;
 };
 
 // Значение None
@@ -122,6 +127,9 @@ public:
     NewInstance(const runtime::Class& class_, std::vector<std::unique_ptr<Statement>> args);
     // Возвращает объект, содержащий значение типа ClassInstance
     runtime::ObjectHolder Execute(runtime::Closure& closure, runtime::Context& context) override;
+private:
+    const runtime::Class& class_;
+    std::vector<std::unique_ptr<Statement>> args_;
 };
 
 // Базовый класс для унарных операций

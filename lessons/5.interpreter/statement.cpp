@@ -37,19 +37,21 @@ VariableValue::VariableValue(const std::string& var_name)
 
 
 VariableValue::VariableValue(std::vector<std::string> dotted_ids) 
-: dotted_ids_(dotted_ids)
-{
-}
+    : dotted_ids_(dotted_ids) {}
 
 ObjectHolder VariableValue::Execute(Closure& closure, Context& /*context*/) {
     if(!var_name_.empty()) {
         if(closure.count(var_name_)) {
             return ObjectHolder::Share(*closure.at(var_name_).Get());
         }
-    } // TODO!!! dotted ids!!!
-    /* else {
-
-    }*/
+    } else if (!dotted_ids_.empty()) {
+        if(closure.count("self"s)) {
+            auto instance_holder = closure.at("self"s).TryAs<runtime::ClassInstance>();
+            if(instance_holder) {
+                return closure.at("self"s);
+            }
+        }
+    }
     throw std::runtime_error("invalid variable"s);
 }
 
@@ -125,13 +127,27 @@ ObjectHolder ClassDefinition::Execute(Closure& /*closure*/, Context& /*context*/
     return {};
 }
 
-FieldAssignment::FieldAssignment(VariableValue /*object*/, std::string /*field_name*/,
-                                 std::unique_ptr<Statement> /*rv*/) {
+FieldAssignment::FieldAssignment(VariableValue object, std::string field_name,
+                                 std::unique_ptr<Statement> rv) 
+    : object_(std::move(object)), field_name_(field_name), statement_ptr_(std::move(rv))
+{
 }
 
-ObjectHolder FieldAssignment::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
-    return {};
+ObjectHolder FieldAssignment::Execute(Closure& closure, Context& context) {
+    if(!statement_ptr_) {
+        return {};
+    }
+    ObjectHolder h = object_.Execute(closure, context);
+    runtime::ClassInstance* instance_ptr = h.TryAs<runtime::ClassInstance>();
+    if(instance_ptr) {
+        ObjectHolder holder = statement_ptr_.get()->Execute(closure, context);
+        instance_ptr->Fields().insert_or_assign(
+            field_name_,
+            ObjectHolder::Share(*(holder.Get()))
+        );
+        return holder;
+    }
+    throw std::runtime_error("invalid variable"s);
 }
 
 IfElse::IfElse(std::unique_ptr<Statement> /*condition*/, std::unique_ptr<Statement> /*if_body*/,
@@ -169,16 +185,38 @@ ObjectHolder Comparison::Execute(Closure& /*closure*/, Context& /*context*/) {
     return {};
 }
 
-NewInstance::NewInstance(const runtime::Class& /*class_*/, std::vector<std::unique_ptr<Statement>> /*args*/){
+NewInstance::NewInstance(const runtime::Class& class_, std::vector<std::unique_ptr<Statement>> args)
+    : class_(class_), args_(std::move(args))
+{
     // Заглушка. Реализуйте метод самостоятельно
 }
 
-NewInstance::NewInstance(const runtime::Class& /*class_*/) {
+NewInstance::NewInstance(const runtime::Class& class_) 
+    : class_(class_)
+{
     // Заглушка. Реализуйте метод самостоятельно
 }
 
-ObjectHolder NewInstance::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
+ObjectHolder NewInstance::Execute(Closure& closure, Context& context) {
+    if(args_.empty()) {
+        const runtime::Method* constructor = class_.GetMethod("__init__");
+        if(constructor) {
+            runtime::ObjectHolder obj = constructor->body.get()->Execute(closure, context);
+            return obj;
+        } else {
+            runtime::ClassInstance instance(class_);
+            // ObjectHolder holder = ObjectHolder::Own<runtime::ClassInstance>(
+            //     std::forward<runtime::ClassInstance>(instance));
+            ObjectHolder holder = ObjectHolder::Share(instance);
+            
+
+            return holder;
+            
+        }
+    } else {
+        // TODO конструктор с параметрами
+        ;
+    }
     return {};
 }
 
