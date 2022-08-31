@@ -20,7 +20,7 @@ ObjectHolder Assignment::Execute(Closure& closure, Context& context) {
     ObjectHolder holder = statement_ptr_.get()->Execute(closure, context);
     closure.insert_or_assign(
         var_,
-        ObjectHolder::Share(*(holder.Get()))
+        holder
     );
     return holder;
 }
@@ -42,30 +42,31 @@ VariableValue::VariableValue(std::vector<std::string> dotted_ids)
 ObjectHolder VariableValue::Execute(Closure& closure, Context& /*context*/) {
     if(!var_name_.empty()) {
         if(closure.count(var_name_)) {
-            return ObjectHolder::Share(*closure.at(var_name_).Get());
+            return closure.at(var_name_);
         }
     } else if (!dotted_ids_.empty()) {
-        Closure* cl = &closure; // cl для исключения перекрытия имен
-        ObjectHolder result;
-        // self ????
-        if(cl->count(dotted_ids_[0])) {
-            result = ObjectHolder::Share(*(cl->at(dotted_ids_[0])));
-            
-            if(dotted_ids_.size() > 1) {
-                for(auto field = next(dotted_ids_.begin()); field != dotted_ids_.end(); ++field) {
-                    runtime::ClassInstance* instance_ptr = result.TryAs<runtime::ClassInstance>();
-                    if(instance_ptr) {
-                        cl = &(instance_ptr->Fields());
-                        if(cl->count(*field)) {
+        if(auto it = closure.find(dotted_ids_[0]); it != closure.end()) {
+            // в таблице символов найдено имя первого объекта
+            ObjectHolder object = it->second;
 
-                            result = ObjectHolder::Share(*cl->at(*field).Get());
-                            
-                        } else { throw std::runtime_error("invalid variable"s); }
-                    } else { throw std::runtime_error("invalid variable"s); }
+            if(dotted_ids_.size() > 1) {
+                for(size_t i = 1; i + 1 < dotted_ids_.size(); ++i) {
+                    if(auto* instance_ptr = object.TryAs<runtime::ClassInstance>()) {
+                        if(auto item = instance_ptr->Fields().find(dotted_ids_[i]); item != instance_ptr->Fields().end()) {
+                            object = item->second;
+                        } else {throw std::runtime_error("invalid variable"s);}
+                    } else {throw std::runtime_error("invalid variable"s);}
                 }
+
+                if(auto* p = object.TryAs<runtime::ClassInstance>()){
+                    if(auto last = p->Fields().find(dotted_ids_.back()); last != p->Fields().end()) {
+                        return last->second;
+                    }
+                } else {throw std::runtime_error("invalid variable"s);}
+            } else {
+                return object;
             }
         }
-        return result;
     }
     
     throw std::runtime_error("invalid variable"s);
@@ -153,18 +154,14 @@ ObjectHolder FieldAssignment::Execute(Closure& closure, Context& context) {
     if(!statement_ptr_) {
         return {};
     }
-    ObjectHolder h = object_.Execute(closure, context);
-    
-    runtime::ClassInstance* instance_ptr = h.TryAs<runtime::ClassInstance>();
-    if(instance_ptr) {
-        ObjectHolder holder = statement_ptr_.get()->Execute(closure, context);
-        instance_ptr->Fields().insert_or_assign(
-            field_name_,
-            ObjectHolder::Share(*(holder.Get()))
-        );
-        return holder;
+    auto* h = object_.Execute(closure, context).TryAs<runtime::ClassInstance>();
+    if(!h) {
+        throw std::runtime_error("invalid variable"s);
     }
-    throw std::runtime_error("invalid variable"s);
+
+    h->Fields()[field_name_] = statement_ptr_->Execute(closure, context);
+    return h->Fields()[field_name_];
+
 }
 
 IfElse::IfElse(std::unique_ptr<Statement> /*condition*/, std::unique_ptr<Statement> /*if_body*/,
@@ -222,9 +219,9 @@ ObjectHolder NewInstance::Execute(Closure& closure, Context& context) {
             return obj;
         } else {
             runtime::ClassInstance instance(class_);
-            // ObjectHolder holder = ObjectHolder::Own<runtime::ClassInstance>(
-            //     std::forward<runtime::ClassInstance>(instance));
-            ObjectHolder holder = ObjectHolder::Share(instance);
+            ObjectHolder holder = ObjectHolder::Own<runtime::ClassInstance>(
+                std::forward<runtime::ClassInstance>(instance));
+            //ObjectHolder holder = ObjectHolder::Share(instance);
             
 
             return holder;
