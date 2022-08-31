@@ -72,9 +72,8 @@ ObjectHolder VariableValue::Execute(Closure& closure, Context& /*context*/) {
     throw std::runtime_error("invalid variable"s);
 }
 
-unique_ptr<Print> Print::Variable(const std::string& /*name*/) {
-    // Заглушка, реализуйте метод самостоятельно
-    throw std::logic_error("Not implemented"s);
+unique_ptr<Print> Print::Variable(const std::string& name) {
+    auto s = Print();
 }
 
 Print::Print(unique_ptr<Statement> /*argument*/) {

@@ -461,8 +461,8 @@ void RunUnitTests(TestRunner& tr) {
     RUN_TEST(tr, ast::TestVariable);
     RUN_TEST(tr, ast::TestAssignment);
     RUN_TEST(tr, ast::TestFieldAssignment);
-    // RUN_TEST(tr, ast::TestPrintVariable);
-    // RUN_TEST(tr, ast::TestPrintMultipleStatements);
+    RUN_TEST(tr, ast::TestPrintVariable);
+    RUN_TEST(tr, ast::TestPrintMultipleStatements);
     // RUN_TEST(tr, ast::TestStringify);
     // RUN_TEST(tr, ast::TestNumbersAddition);
     // RUN_TEST(tr, ast::TestStringsAddition);

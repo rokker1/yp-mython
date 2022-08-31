@@ -97,6 +97,9 @@ public:
     // Во время выполнения команды print вывод должен осуществляться в поток, возвращаемый из
     // context.GetOutputStream()
     runtime::ObjectHolder Execute(runtime::Closure& closure, runtime::Context& context) override;
+
+private:
+    std::string name_;
 };
 
 // Вызывает метод object.method со списком параметров args
