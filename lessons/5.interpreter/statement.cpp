@@ -57,7 +57,9 @@ ObjectHolder VariableValue::Execute(Closure& closure, Context& /*context*/) {
                     if(instance_ptr) {
                         cl = &(instance_ptr->Fields());
                         if(cl->count(*field)) {
-                            result = ObjectHolder::Share(*cl->at(*field));
+
+                            result = ObjectHolder::Share(*cl->at(*field).Get());
+                            
                         } else { throw std::runtime_error("invalid variable"s); }
                     } else { throw std::runtime_error("invalid variable"s); }
                 }
@@ -152,6 +154,7 @@ ObjectHolder FieldAssignment::Execute(Closure& closure, Context& context) {
         return {};
     }
     ObjectHolder h = object_.Execute(closure, context);
+    
     runtime::ClassInstance* instance_ptr = h.TryAs<runtime::ClassInstance>();
     if(instance_ptr) {
         ObjectHolder holder = statement_ptr_.get()->Execute(closure, context);
