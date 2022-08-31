@@ -45,13 +45,27 @@ ObjectHolder VariableValue::Execute(Closure& closure, Context& /*context*/) {
             return ObjectHolder::Share(*closure.at(var_name_).Get());
         }
     } else if (!dotted_ids_.empty()) {
-        if(closure.count("self"s)) {
-            auto instance_holder = closure.at("self"s).TryAs<runtime::ClassInstance>();
-            if(instance_holder) {
-                return closure.at("self"s);
+        Closure* cl = &closure; // cl для исключения перекрытия имен
+        ObjectHolder result;
+        // self ????
+        if(cl->count(dotted_ids_[0])) {
+            result = ObjectHolder::Share(*(cl->at(dotted_ids_[0])));
+            
+            if(dotted_ids_.size() > 1) {
+                for(auto field = next(dotted_ids_.begin()); field != dotted_ids_.end(); ++field) {
+                    runtime::ClassInstance* instance_ptr = result.TryAs<runtime::ClassInstance>();
+                    if(instance_ptr) {
+                        cl = &(instance_ptr->Fields());
+                        if(cl->count(*field)) {
+                            result = ObjectHolder::Share(*cl->at(*field));
+                        } else { throw std::runtime_error("invalid variable"s); }
+                    } else { throw std::runtime_error("invalid variable"s); }
+                }
             }
         }
+        return result;
     }
+    
     throw std::runtime_error("invalid variable"s);
 }
 
