@@ -99,7 +99,7 @@ public:
     runtime::ObjectHolder Execute(runtime::Closure& closure, runtime::Context& context) override;
 
 private:
-    std::string name_;
+    std::vector<std::unique_ptr<Statement>> args_;
 };
 
 // Вызывает метод object.method со списком параметров args

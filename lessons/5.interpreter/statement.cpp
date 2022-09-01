@@ -73,19 +73,25 @@ ObjectHolder VariableValue::Execute(Closure& closure, Context& /*context*/) {
 }
 
 unique_ptr<Print> Print::Variable(const std::string& name) {
-    auto s = Print();
+    return make_unique<Print>(make_unique<VariableValue>(name));
 }
 
-Print::Print(unique_ptr<Statement> /*argument*/) {
-    // Заглушка, реализуйте метод самостоятельно
+Print::Print(unique_ptr<Statement> argument) 
+{
+    args_.push_back(std::move(argument));
 }
 
-Print::Print(vector<unique_ptr<Statement>> /*args*/) {
-    // Заглушка, реализуйте метод самостоятельно
+Print::Print(vector<unique_ptr<Statement>> args) 
+    : args_(std::move(args))
+{
+
 }
 
-ObjectHolder Print::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
+ObjectHolder Print::Execute(Closure& closure, Context& context) {
+    for(const auto &statement : args_) {
+        statement->Execute(closure, context).Get()->Print(context.GetOutputStream(), context);
+    }
+    context.GetOutputStream() << '\n';
     return {};
 }
 
