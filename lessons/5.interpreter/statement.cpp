@@ -88,8 +88,18 @@ Print::Print(vector<unique_ptr<Statement>> args)
 }
 
 ObjectHolder Print::Execute(Closure& closure, Context& context) {
+    bool is_first = true;
     for(const auto &statement : args_) {
-        statement->Execute(closure, context).Get()->Print(context.GetOutputStream(), context);
+        if(!is_first) {
+            context.GetOutputStream() << ' ';
+        }
+        is_first = false;
+        ObjectHolder holder = statement->Execute(closure, context);
+        if(holder) {
+            holder.Get()->Print(context.GetOutputStream(), context);
+        } else {
+            context.GetOutputStream() << "None"s;
+        }
     }
     context.GetOutputStream() << '\n';
     return {};
