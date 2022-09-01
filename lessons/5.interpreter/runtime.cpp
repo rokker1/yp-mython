@@ -56,12 +56,18 @@ void ClassInstance::Print(std::ostream& os, Context& context) {
     if(HasMethod("__str__", 0)) {
         ObjectHolder string_representation = Call("__str__", {}, context);
         if(string_representation) { // если холдер не пуст
+            /* old version
             String* s_object_ptr = string_representation.TryAs<String>();
             s_object_ptr->Print(os, context);
+            */
+           string_representation.Get()->Print(os, context);
         }
     } else {
+        /* old version
         size_t obj_address = *(reinterpret_cast<size_t*>(this));
         os << obj_address;
+        */
+        os << this;
     }
 }
 
@@ -83,8 +89,9 @@ bool ClassInstance::HasMethod(const std::string& method, size_t argument_count) 
             return false;
         }
     }
-
-   throw runtime_error("e"s);
+    // old version
+    // throw runtime_error("e"s);
+    return false;
 }
 
 Closure& ClassInstance::Fields() {

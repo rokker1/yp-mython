@@ -109,6 +109,11 @@ public:
                std::vector<std::unique_ptr<Statement>> args);
 
     runtime::ObjectHolder Execute(runtime::Closure& closure, runtime::Context& context) override;
+
+private:
+    std::unique_ptr<Statement> object_;
+    std::string method_;
+    std::vector<std::unique_ptr<Statement>> args_;
 };
 
 /*
@@ -138,10 +143,11 @@ private:
 // Базовый класс для унарных операций
 class UnaryOperation : public Statement {
 public:
-    explicit UnaryOperation(std::unique_ptr<Statement> argument) {
-        // Реализуйте метод самостоятельно
+    explicit UnaryOperation(std::unique_ptr<Statement> argument) 
+        : argument_(std::move(argument)) {}
 
-    }
+protected:
+    std::unique_ptr<Statement> argument_;
 };
 
 // Операция str, возвращающая строковое значение своего аргумента

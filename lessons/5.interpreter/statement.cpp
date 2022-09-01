@@ -105,19 +105,38 @@ ObjectHolder Print::Execute(Closure& closure, Context& context) {
     return {};
 }
 
-MethodCall::MethodCall(std::unique_ptr<Statement> /*object*/, std::string /*method*/,
-                       std::vector<std::unique_ptr<Statement>> /*args*/) {
-    // Заглушка. Реализуйте метод самостоятельно
+MethodCall::MethodCall(std::unique_ptr<Statement> object, std::string method,
+                       std::vector<std::unique_ptr<Statement>> args) 
+    : object_(std::move(object))
+    , method_(std::move(method))
+    , args_(std::move(args)) {}
+
+ObjectHolder MethodCall::Execute(Closure& closure, Context& context) {
+    runtime::ClassInstance* instance_ptr = object_->Execute(closure, context).TryAs<runtime::ClassInstance>();
+    if(instance_ptr) {
+        std::vector<ObjectHolder> actual_args;
+        for(const auto& arg : args_) {
+            actual_args.push_back(std::move(arg->Execute(closure, context)));
+        }
+        return instance_ptr->Call(method_, std::move(actual_args), context);
+    }
+    throw std::runtime_error("invalid something"s);
+
 }
 
-ObjectHolder MethodCall::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
-    return {};
-}
+ObjectHolder Stringify::Execute(Closure& closure, Context& context) {
+    ObjectHolder a = argument_->Execute(closure, context);
+    ostringstream s;
+    if(!a) {
+        s << "None"s;
+        
+    } else {
+        a.Get()->Print(s, context);
+    }
 
-ObjectHolder Stringify::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
-    return {};
+    runtime::String value(s.str());
+    auto holder = ObjectHolder::Own<runtime::String>(std::forward<runtime::String>(value));
+    return holder;
 }
 
 ObjectHolder Add::Execute(Closure& /*closure*/, Context& /*context*/) {
