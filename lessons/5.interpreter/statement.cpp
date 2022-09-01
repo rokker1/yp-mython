@@ -175,8 +175,10 @@ ObjectHolder Div::Execute(Closure& /*closure*/, Context& /*context*/) {
     return {};
 }
 
-ObjectHolder Compound::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
+ObjectHolder Compound::Execute(Closure& closure, Context& context) {
+    for(const auto& s : statements_) {
+        s->Execute(closure, context);
+    }
     return {};
 }
 

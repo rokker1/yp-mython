@@ -247,18 +247,32 @@ public:
 class Compound : public Statement {
 public:
     // Конструирует Compound из нескольких инструкций типа unique_ptr<Statement>
-    template <typename... Args>
-    explicit Compound(Args&&... /*args*/) {
-        // Реализуйте метод самостоятельно
+    template <typename... Args> // Args - пакет параметров шаблона
+    explicit Compound(Args&&... args) 
+    { // args — пакет параметров функции
+        if constexpr(sizeof...(args) != 0) {
+            CompoundImpl(args...);
+        }
     }
 
     // Добавляет очередную инструкцию в конец составной инструкции
-    void AddStatement(std::unique_ptr<Statement> /*stmt*/) {
-        // Реализуйте метод самостоятельно
+    void AddStatement(std::unique_ptr<Statement> stmt) {
+        statements_.push_back(std::move(stmt));
     }
 
     // Последовательно выполняет добавленные инструкции. Возвращает None
     runtime::ObjectHolder Execute(runtime::Closure& closure, runtime::Context& context) override;
+
+private:
+    std::vector<std::unique_ptr<Statement>> statements_;
+
+    template <typename Arg0, typename... Args>
+    void CompoundImpl(Arg0&& a0, Args&&... args) {
+        statements_.push_back(std::move(a0));
+        if constexpr(sizeof...(args) != 0) {
+            CompoundImpl(args...);
+        }
+    }
 };
 
 // Тело метода. Как правило, содержит составную инструкцию
