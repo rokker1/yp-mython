@@ -464,11 +464,11 @@ void RunUnitTests(TestRunner& tr) {
     RUN_TEST(tr, ast::TestPrintVariable);
     RUN_TEST(tr, ast::TestPrintMultipleStatements);
     RUN_TEST(tr, ast::TestStringify);
-    // RUN_TEST(tr, ast::TestNumbersAddition);
-    // RUN_TEST(tr, ast::TestStringsAddition);
-    // RUN_TEST(tr, ast::TestBadAddition);
-    // RUN_TEST(tr, ast::TestSuccessfulClassInstanceAdd);
-    // RUN_TEST(tr, ast::TestClassInstanceAddWithoutMethod);
+    RUN_TEST(tr, ast::TestNumbersAddition);
+    RUN_TEST(tr, ast::TestStringsAddition);
+    RUN_TEST(tr, ast::TestBadAddition);
+    RUN_TEST(tr, ast::TestSuccessfulClassInstanceAdd);
+    RUN_TEST(tr, ast::TestClassInstanceAddWithoutMethod);
     // RUN_TEST(tr, ast::TestCompound);
     // RUN_TEST(tr, ast::TestFields);
     // RUN_TEST(tr, ast::TestBaseClass);

@@ -139,9 +139,25 @@ ObjectHolder Stringify::Execute(Closure& closure, Context& context) {
     return holder;
 }
 
-ObjectHolder Add::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
-    return {};
+ObjectHolder Add::Execute(Closure& closure, Context& context) {
+    const ObjectHolder l_holder = lhs_->Execute(closure, context);
+    const ObjectHolder r_holder = rhs_->Execute(closure, context);
+    if(auto l = l_holder.TryAs<runtime::Number>()) {
+        if(auto r = r_holder.TryAs<runtime::Number>()) {
+            return ObjectHolder::Own<runtime::Number>(std::forward<runtime::Number>(l->GetValue() + r->GetValue()));
+        }
+    } else if (auto l = l_holder.TryAs<runtime::String>()) {
+        if(auto r = r_holder.TryAs<runtime::String>()) {
+            return ObjectHolder::Own<runtime::String>(std::forward<runtime::String>(l->GetValue() + r->GetValue()));
+        }
+    } else if (auto instance_ptr = l_holder.TryAs<runtime::ClassInstance>()) {
+        if (instance_ptr->HasMethod("__add__"s, 1)) {
+            std::vector<ObjectHolder> actual_args;
+            actual_args.push_back(std::move(r_holder));
+            return instance_ptr->Call("__add__"s, std::move(actual_args), context);
+        }
+    } 
+    throw std::runtime_error("can't add"s);
 }
 
 ObjectHolder Sub::Execute(Closure& /*closure*/, Context& /*context*/) {

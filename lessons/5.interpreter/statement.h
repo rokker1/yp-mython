@@ -160,9 +160,15 @@ public:
 // Родительский класс Бинарная операция с аргументами lhs и rhs
 class BinaryOperation : public Statement {
 public:
-    BinaryOperation(std::unique_ptr<Statement> /*lhs*/, std::unique_ptr<Statement> /*rhs*/) {
+    BinaryOperation(std::unique_ptr<Statement> lhs, std::unique_ptr<Statement> rhs) 
+        : lhs_(std::move(lhs)), rhs_(std::move(rhs))
+    {
         // Реализуйте метод самостоятельно
     }
+
+protected:
+    std::unique_ptr<Statement> lhs_;
+    std::unique_ptr<Statement> rhs_;
 };
 
 // Возвращает результат операции + над аргументами lhs и rhs
