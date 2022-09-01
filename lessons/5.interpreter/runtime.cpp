@@ -111,7 +111,7 @@ ClassInstance::ClassInstance(const Class& cls)
 ObjectHolder ClassInstance::Call(const std::string& method,
                                  const std::vector<ObjectHolder>& actual_args,
                                  Context& context) {
-    
+    // неверная логика
     fields_.clear();
     fields_.insert({"self", ObjectHolder::Share(*this)});
 

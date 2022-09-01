@@ -264,25 +264,21 @@ NewInstance::NewInstance(const runtime::Class& class_)
 }
 
 ObjectHolder NewInstance::Execute(Closure& closure, Context& context) {
-    if(args_.empty()) {
-        const runtime::Method* constructor = class_.GetMethod("__init__");
-        if(constructor) {
+    const runtime::Method* constructor = class_.GetMethod("__init__");
+    if(constructor) {
+        if(args_.empty()) {
             runtime::ObjectHolder obj = constructor->body.get()->Execute(closure, context);
             return obj;
         } else {
-            runtime::ClassInstance instance(class_);
-            ObjectHolder holder = ObjectHolder::Own<runtime::ClassInstance>(
-                std::forward<runtime::ClassInstance>(instance));
-            //ObjectHolder holder = ObjectHolder::Share(instance);
-            
-
-            return holder;
             
         }
     } else {
-        // TODO конструктор с параметрами
-        ;
+        runtime::ClassInstance instance(class_);
+        ObjectHolder holder = ObjectHolder::Own<runtime::ClassInstance>(
+            std::forward<runtime::ClassInstance>(instance));
+        return holder;
     }
+
     return {};
 }
 
