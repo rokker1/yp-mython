@@ -226,19 +226,37 @@ ObjectHolder IfElse::Execute(Closure& /*closure*/, Context& /*context*/) {
     return {};
 }
 
-ObjectHolder Or::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
+ObjectHolder Or::Execute(Closure& closure, Context& context) {
+
+    runtime::Bool* l = lhs_->Execute(closure, context).TryAs<runtime::Bool>();
+    if(l != nullptr) {
+        if(l->GetValue()) {
+            return ObjectHolder::Own<runtime::Bool>(std::forward<runtime::Bool>({true}));
+        } else {
+            runtime::Bool* r = rhs_->Execute(closure, context).TryAs<runtime::Bool>();
+            return ObjectHolder::Own<runtime::Bool>(std::forward<runtime::Bool>({r->GetValue()}));
+        }
+    }
     return {};
 }
 
-ObjectHolder And::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
+ObjectHolder And::Execute(Closure& closure, Context& context) {
+    runtime::Bool* l = lhs_->Execute(closure, context).TryAs<runtime::Bool>();
+    if(l != nullptr) {
+        if(!(l->GetValue())) {
+            return ObjectHolder::Own<runtime::Bool>(std::forward<runtime::Bool>({false}));
+        } else {
+            runtime::Bool* r = rhs_->Execute(closure, context).TryAs<runtime::Bool>();
+            return ObjectHolder::Own<runtime::Bool>(std::forward<runtime::Bool>({r->GetValue()}));
+        }
+    }
     return {};
 }
 
-ObjectHolder Not::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
-    return {};
+ObjectHolder Not::Execute(Closure& closure, Context& context) {
+    return ObjectHolder::Own<runtime::Bool>(std::forward<runtime::Bool>({
+        !argument_->Execute(closure, context).TryAs<runtime::Bool>()->GetValue()
+    }));
 }
 
 Comparison::Comparison(Comparator /*cmp*/, unique_ptr<Statement> lhs, unique_ptr<Statement> rhs)

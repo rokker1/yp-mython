@@ -473,9 +473,9 @@ void RunUnitTests(TestRunner& tr) {
     RUN_TEST(tr, ast::TestFields);
     RUN_TEST(tr, ast::TestBaseClass);
     RUN_TEST(tr, ast::TestInheritance);
-    // RUN_TEST(tr, ast::TestOr);
-    // RUN_TEST(tr, ast::TestAnd);
-    // RUN_TEST(tr, ast::TestNot);
+    RUN_TEST(tr, ast::TestOr);
+    RUN_TEST(tr, ast::TestAnd);
+    RUN_TEST(tr, ast::TestNot);
 }
 
 }  // namespace ast
