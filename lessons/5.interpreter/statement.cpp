@@ -160,19 +160,42 @@ ObjectHolder Add::Execute(Closure& closure, Context& context) {
     throw std::runtime_error("can't add"s);
 }
 
-ObjectHolder Sub::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
-    return {};
+ObjectHolder Sub::Execute(Closure& closure, Context& context) {
+    const ObjectHolder l_holder = lhs_->Execute(closure, context);
+    
+    if(auto l = l_holder.TryAs<runtime::Number>()) {
+        const ObjectHolder r_holder = rhs_->Execute(closure, context);
+        if(auto r = r_holder.TryAs<runtime::Number>()) {
+            return ObjectHolder::Own<runtime::Number>(std::forward<runtime::Number>(l->GetValue() - r->GetValue()));
+        }
+    } 
+    throw std::runtime_error("can't sub"s);
 }
 
-ObjectHolder Mult::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
-    return {};
+ObjectHolder Mult::Execute(Closure& closure, Context& context) {
+    const ObjectHolder l_holder = lhs_->Execute(closure, context);
+    
+    if(auto l = l_holder.TryAs<runtime::Number>()) {
+        const ObjectHolder r_holder = rhs_->Execute(closure, context);
+        if(auto r = r_holder.TryAs<runtime::Number>()) {
+            return ObjectHolder::Own<runtime::Number>(std::forward<runtime::Number>(l->GetValue() * r->GetValue()));
+        }
+    } 
+    throw std::runtime_error("can't mult"s);
 }
 
-ObjectHolder Div::Execute(Closure& /*closure*/, Context& /*context*/) {
-    // Заглушка. Реализуйте метод самостоятельно
-    return {};
+ObjectHolder Div::Execute(Closure& closure, Context& context) {
+    const ObjectHolder l_holder = lhs_->Execute(closure, context);
+    
+    if(auto l = l_holder.TryAs<runtime::Number>()) {
+        const ObjectHolder r_holder = rhs_->Execute(closure, context);
+
+        if(auto r = r_holder.TryAs<runtime::Number>()) {
+            if(r->GetValue() == 0) { throw std::runtime_error("can't divide by zero!"s); }
+            return ObjectHolder::Own<runtime::Number>(std::forward<runtime::Number>(l->GetValue() * r->GetValue()));
+        }
+    } 
+    throw std::runtime_error("can't div"s);
 }
 
 ObjectHolder Compound::Execute(Closure& closure, Context& context) {
