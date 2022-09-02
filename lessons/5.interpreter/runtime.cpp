@@ -112,8 +112,14 @@ ObjectHolder ClassInstance::Call(const std::string& method,
                                  const std::vector<ObjectHolder>& actual_args,
                                  Context& context) {
     // неверная логика
-    fields_.clear();
-    fields_.insert({"self", ObjectHolder::Share(*this)});
+    //fields_.clear();
+    //fields_.insert({"self", ObjectHolder::Share(*this)});
+
+    Closure fields;
+    fields.insert({"self", ObjectHolder::Share(*this)});
+
+
+
 
     size_t args_count = 0;
     if(!actual_args.empty()) {
@@ -130,9 +136,9 @@ ObjectHolder ClassInstance::Call(const std::string& method,
         }
         size_t params_count = m->formal_params.size();
         for(size_t i = 0; i < params_count; ++i) {
-            fields_.insert({m->formal_params.at(i), actual_args.at(i)});
+            fields.insert({m->formal_params.at(i), actual_args.at(i)});
         }
-        return m->body.get()->Execute(fields_, context);
+        return m->body.get()->Execute(fields, context);
         
     } else {
         throw runtime_error("No such method!"s);
