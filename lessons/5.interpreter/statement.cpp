@@ -94,7 +94,7 @@ ObjectHolder Print::Execute(Closure& closure, Context& context) {
             context.GetOutputStream() << ' ';
         }
         is_first = false;
-        ObjectHolder holder = statement->Execute(closure, context);
+        ObjectHolder holder = statement->Execute(closure, context); // здесь
         if(holder) {
             holder.Get()->Print(context.GetOutputStream(), context);
         } else {

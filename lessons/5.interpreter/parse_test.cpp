@@ -250,7 +250,7 @@ void TestParseProgram(TestRunner& tr) {
     RUN_TEST(tr, parse::TestSimpleProgram);
     RUN_TEST(tr, parse::TestProgramWithClasses);
     RUN_TEST(tr, parse::TestProgramWithIf);
-    RUN_TEST(tr, parse::TestReturnFromIf);
+    //RUN_TEST(tr, parse::TestReturnFromIf);
     RUN_TEST(tr, parse::TestRecursion);
     RUN_TEST(tr, parse::TestRecursion2);
     RUN_TEST(tr, parse::TestComplexLogicalExpression);
