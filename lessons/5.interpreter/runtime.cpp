@@ -111,15 +111,8 @@ ClassInstance::ClassInstance(const Class& cls)
 ObjectHolder ClassInstance::Call(const std::string& method,
                                  const std::vector<ObjectHolder>& actual_args,
                                  Context& context) {
-    // неверная логика
-    //fields_.clear();
-    //fields_.insert({"self", ObjectHolder::Share(*this)});
-
     Closure fields;
     fields.insert({"self", ObjectHolder::Share(*this)});
-
-
-
 
     size_t args_count = 0;
     if(!actual_args.empty()) {
@@ -161,6 +154,11 @@ const Method* Class::GetMethod(const std::string& name) const {
                 });
     if(method != methods_.end()) {
         return &(*method);
+    } else if(parent_) {
+        const Method* m = parent_->GetMethod(name);
+        if(m) {
+            return &(*m);
+        }
     }
     return nullptr;
 }
