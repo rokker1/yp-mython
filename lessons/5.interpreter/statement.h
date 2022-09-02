@@ -284,18 +284,23 @@ public:
     // Если внутри body была выполнена инструкция return, возвращает результат return
     // В противном случае возвращает None
     runtime::ObjectHolder Execute(runtime::Closure& closure, runtime::Context& context) override;
+
+private:
+    Compound body_;
 };
 
 // Выполняет инструкцию return с выражением statement
 class Return : public Statement {
 public:
-    explicit Return(std::unique_ptr<Statement> /*statement*/) {
-        // Реализуйте метод самостоятельно
-    }
+    explicit Return(std::unique_ptr<Statement> statement) 
+        : statement_(std::move(statement)) {}
 
     // Останавливает выполнение текущего метода. После выполнения инструкции return метод,
     // внутри которого она была исполнена, должен вернуть результат вычисления выражения statement.
     runtime::ObjectHolder Execute(runtime::Closure& closure, runtime::Context& context) override;
+
+private:
+    std::unique_ptr<Statement> statement_;
 };
 
 // Объявляет класс
@@ -307,6 +312,9 @@ public:
     // Создаёт внутри closure новый объект, совпадающий с именем класса и значением, переданным в
     // конструктор
     runtime::ObjectHolder Execute(runtime::Closure& closure, runtime::Context& context) override;
+
+private:
+    runtime::ObjectHolder cls_;
 };
 
 // Инструкция if <condition> <if_body> else <else_body>
@@ -317,6 +325,11 @@ public:
            std::unique_ptr<Statement> else_body);
 
     runtime::ObjectHolder Execute(runtime::Closure& closure, runtime::Context& context) override;
+
+private:
+    std::unique_ptr<Statement> condition_;
+    MethodBody if_body_;
+    MethodBody else_body_;
 };
 
 // Операция сравнения
@@ -331,6 +344,9 @@ public:
     // Вычисляет значение выражений lhs и rhs и возвращает результат работы comparator,
     // приведённый к типу runtime::Bool
     runtime::ObjectHolder Execute(runtime::Closure& closure, runtime::Context& context) override;
+
+private:
+    Comparator cmp_;
 };
 
 }  // namespace ast
