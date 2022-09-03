@@ -345,38 +345,16 @@ NewInstance::NewInstance(const runtime::Class& class_)
 }
 
 ObjectHolder NewInstance::Execute(Closure& closure, Context& context) {
-    const runtime::Method* constructor = class_.GetMethod("__init__");
-    if(constructor) {
-        if(args_.empty()) {
-            /* old
-            runtime::ObjectHolder obj = constructor->body.get()->Execute(closure, context);
-            return obj;
-            */
-            runtime::ClassInstance instance(class_);
-            instance.Call("__init__"s, {}, context);
-            ObjectHolder holder = ObjectHolder::Own<runtime::ClassInstance>(
-                std::forward<runtime::ClassInstance>(instance));
-            return holder;
-        } else {
-            vector<ObjectHolder> actual_args;
-            for(const auto& arg : args_) {
-                actual_args.push_back(std::move(arg->Execute(closure, context)));
-            }
-
-            runtime::ClassInstance instance(class_);
-            instance.Call("__init__"s, std::move(actual_args), context);
-            ObjectHolder holder = ObjectHolder::Own<runtime::ClassInstance>(
-                std::forward<runtime::ClassInstance>(instance));
-            return holder;
+    ObjectHolder instance = ObjectHolder::Own(runtime::ClassInstance(class_));
+    runtime::ClassInstance* instance_ptr = instance.TryAs<runtime::ClassInstance>();
+    if(instance_ptr && instance_ptr->HasMethod("__init__"s, args_.size())) {
+        std::vector<runtime::ObjectHolder> actual_args;
+        for (const auto &arg : args_) {
+            actual_args.push_back(arg->Execute(closure, context));
         }
-    } else {
-        runtime::ClassInstance instance(class_);
-        ObjectHolder holder = ObjectHolder::Own<runtime::ClassInstance>(
-            std::forward<runtime::ClassInstance>(instance));
-        return holder;
+        instance_ptr->Call("__init__"s, actual_args, context);
     }
-
-    return {};
+    return instance;
 }
 
 MethodBody::MethodBody(std::unique_ptr<Statement>&& body) 
