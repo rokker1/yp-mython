@@ -54,22 +54,21 @@ ObjectHolder VariableValue::Execute(Closure& closure, Context& /*context*/) {
                     if(auto* instance_ptr = object.TryAs<runtime::ClassInstance>()) {
                         if(auto item = instance_ptr->Fields().find(dotted_ids_[i]); item != instance_ptr->Fields().end()) {
                             object = item->second;
-                        } else {throw std::runtime_error("invalid variable"s);}
-                    } else {throw std::runtime_error("invalid variable"s);}
+                        } else {throw std::runtime_error("invalid variable 1"s);}
+                    } else {throw std::runtime_error("invalid variable 2"s);}
                 }
 
                 if(auto* p = object.TryAs<runtime::ClassInstance>()){
                     if(auto last = p->Fields().find(dotted_ids_.back()); last != p->Fields().end()) {
                         return last->second;
                     }
-                } else {throw std::runtime_error("invalid variable"s);}
+                } else {throw std::runtime_error("invalid variable 3"s);}
             } else {
                 return object;
             }
         }
     }
-    
-    throw std::runtime_error("invalid variable"s);
+    throw std::runtime_error("invalid variable 4"s);
 }
 
 unique_ptr<Print> Print::Variable(const std::string& name) {
@@ -242,7 +241,7 @@ ObjectHolder FieldAssignment::Execute(Closure& closure, Context& context) {
     }
     auto* h = object_.Execute(closure, context).TryAs<runtime::ClassInstance>();
     if(!h) {
-        throw std::runtime_error("invalid variable"s);
+        throw std::runtime_error("invalid variable 6"s);
     }
 
     h->Fields()[field_name_] = statement_ptr_->Execute(closure, context);
@@ -350,8 +349,15 @@ ObjectHolder NewInstance::Execute(Closure& closure, Context& context) {
     const runtime::Method* constructor = class_.GetMethod("__init__");
     if(constructor) {
         if(args_.empty()) {
+            /* old
             runtime::ObjectHolder obj = constructor->body.get()->Execute(closure, context);
             return obj;
+            */
+            runtime::ClassInstance instance(class_);
+            instance.Call("__init__"s, {}, context);
+            ObjectHolder holder = ObjectHolder::Own<runtime::ClassInstance>(
+                std::forward<runtime::ClassInstance>(instance));
+            return holder;
         } else {
             vector<ObjectHolder> actual_args;
             for(const auto& arg : args_) {
