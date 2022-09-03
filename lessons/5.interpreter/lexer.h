@@ -109,7 +109,7 @@ public:
     const T& Expect() const {
         using namespace std::literals;
         if(!(current_token_->Is<T>())) {
-            throw LexerError("Expect<T> not passed for curren_token_!"s);
+            throw LexerError("Expect<T> not passed for curren_token_!!!!"s);
         }
         return current_token_->As<T>();
     }

@@ -328,8 +328,8 @@ public:
 
 private:
     std::unique_ptr<Statement> condition_;
-    MethodBody if_body_;
-    MethodBody else_body_;
+    Compound if_body_;
+    Compound else_body_;
 };
 
 // Операция сравнения

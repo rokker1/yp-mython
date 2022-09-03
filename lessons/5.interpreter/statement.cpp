@@ -191,30 +191,29 @@ ObjectHolder Div::Execute(Closure& closure, Context& context) {
 
         if(auto r = r_holder.TryAs<runtime::Number>()) {
             if(r->GetValue() == 0) { throw std::runtime_error("can't divide by zero!"s); }
-            return ObjectHolder::Own<runtime::Number>(std::forward<runtime::Number>(l->GetValue() * r->GetValue()));
+            return ObjectHolder::Own<runtime::Number>(std::forward<runtime::Number>(l->GetValue() / r->GetValue()));
         }
     } 
     throw std::runtime_error("can't div"s);
 }
 
 ObjectHolder Compound::Execute(Closure& closure, Context& context) {
-
-    for (auto&& s : statements_)
-    {
-        if(s) {
-            s->Execute(closure, context);
+    try {
+        for (auto& s : statements_)
+        {
+            if(s) {
+                s->Execute(closure, context);
+            }
         }
-
+    } catch (ObjectHolder h) {
+        throw h;
     }
-
-
-
-
     return {};
 }
 
 ObjectHolder Return::Execute(Closure& closure, Context& context) {
-    throw statement_->Execute(closure, context);
+    ObjectHolder h = statement_->Execute(closure, context);
+    throw h;
 }
 
 ClassDefinition::ClassDefinition(ObjectHolder cls) 
@@ -222,7 +221,7 @@ ClassDefinition::ClassDefinition(ObjectHolder cls)
 {
 }
 
-ObjectHolder ClassDefinition::Execute(Closure& closure, Context& context) {
+ObjectHolder ClassDefinition::Execute(Closure& closure, [[maybe_unused]] Context& context) {
     runtime::Class* class_holder = cls_.TryAs<runtime::Class>();
     std::string class_name = class_holder->GetName();
     closure.insert(make_pair(class_name, cls_));
@@ -269,7 +268,7 @@ ObjectHolder IfElse::Execute(Closure& closure, Context& context) {
                 return if_body_.Execute(closure, context);
                 
             } catch (ObjectHolder h) {
-                return h;
+                throw h;
             }
         } else {
             try {
@@ -279,7 +278,7 @@ ObjectHolder IfElse::Execute(Closure& closure, Context& context) {
                 return else_body_.Execute(closure, context);
                 
             } catch (ObjectHolder h) {
-                return h;
+                throw h;
             }
         }
     }
@@ -388,8 +387,8 @@ MethodBody::MethodBody(std::unique_ptr<Statement>&& body)
 
 ObjectHolder MethodBody::Execute(Closure& closure, Context& context) {
     try {
-        body_.Execute(closure, context);
-        return {};
+
+        return body_.Execute(closure, context);
         /* alt 
         return body_.Execute(closure, context);
         */
