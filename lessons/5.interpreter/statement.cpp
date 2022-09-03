@@ -200,9 +200,15 @@ ObjectHolder Div::Execute(Closure& closure, Context& context) {
 
 ObjectHolder Compound::Execute(Closure& closure, Context& context) {
 
-    for(const auto& s : statements_) {
-        s->Execute(closure, context);
+    for (auto&& s : statements_)
+    {
+        if(s) {
+            s->Execute(closure, context);
+        }
+
     }
+
+
 
 
     return {};
