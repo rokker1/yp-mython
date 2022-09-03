@@ -31,6 +31,7 @@ void RunMythonProgram(istream& input, ostream& output) {
     runtime::SimpleContext context{output};
     runtime::Closure closure;
     program->Execute(closure, context);
+
 }
 
 void TestSimplePrints() {
@@ -111,35 +112,42 @@ print y.value
     ASSERT_EQUAL(output.str(), "2\n3\n");
 }
 
-void TestSelfAssignment() {
+void SelfInConstructor() {
     istringstream input(R"--(
 class X:
   def __init__(p):
-    p.x = selfclass XHolder:
+    p.x = self
+
+class XHolder:
   def __init__():
-    dummy = 0xh = XHolder()
+    dummy = 0
+
+xh = XHolder()
 x = X(xh)
-)--");
+)--"
+);
 
     ostringstream output;
     RunMythonProgram(input, output);
-
+    /*
+    xh->Fields().at("x"s).Get() != closure.at("x"s).Get()
+    */
     // ASSERT_EQUAL(output.str(), "2\n3\n");
 }
 
 void TestAll() {
     TestRunner tr;
-    parse::RunOpenLexerTests(tr);
-    runtime::RunObjectHolderTests(tr);
-    runtime::RunObjectsTests(tr);
-    ast::RunUnitTests(tr);
-    TestParseProgram(tr);
+     parse::RunOpenLexerTests(tr);
+     runtime::RunObjectHolderTests(tr);
+     runtime::RunObjectsTests(tr);
+     ast::RunUnitTests(tr);
+     TestParseProgram(tr);
 
-    RUN_TEST(tr, TestSimplePrints);
-    RUN_TEST(tr, TestAssignments);
-    RUN_TEST(tr, TestArithmetics);
-    RUN_TEST(tr, TestVariablesArePointers);
-    RUN_TEST(tr, TestSelfAssignment);
+     RUN_TEST(tr, TestSimplePrints);
+     RUN_TEST(tr, TestAssignments);
+     RUN_TEST(tr, TestArithmetics);
+     RUN_TEST(tr, TestVariablesArePointers);
+     RUN_TEST(tr, SelfInConstructor);
 }
 
 }  // namespace

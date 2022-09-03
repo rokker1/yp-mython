@@ -112,6 +112,7 @@ ObjectHolder ClassInstance::Call(const std::string& method,
                                  const std::vector<ObjectHolder>& actual_args,
                                  Context& context) {
     Closure fields;
+
     fields.insert({"self", ObjectHolder::Share(*this)});
 
     size_t args_count = 0;
